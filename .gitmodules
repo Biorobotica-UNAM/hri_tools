@@ -1,0 +1,3 @@
+[submodule "talker"]
+	path = talker
+	url = https://github.com/Biorobotica-UNAM/talker.git
