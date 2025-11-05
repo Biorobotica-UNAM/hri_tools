@@ -5,7 +5,7 @@ HRI::HRI(rclcpp::Node::SharedPtr node)
 {
     pub_speech_ = node_->create_publisher<std_msgs::msg::String>("voice/speech", 10);
     sub_speech_status_ = node_->create_subscription<std_msgs::msg::Bool>("voice/speech_status", 10, std::bind(&HRI::speechStatusCallback, this, std::placeholders::_1));
-    client_recog_ = node_->create_client<vosk_speech_recognition::srv::SpeechRecog>("speech_recognition", rclcpp::QoS(10));
+    client_recog_ = node_->create_client<listener_interfaces::srv::Listen>("speech_recognition", rclcpp::QoS(10));
 }
 
 void HRI::speechStatusCallback(const std_msgs::msg::Bool::SharedPtr msg)
@@ -49,8 +49,8 @@ void HRI::say(const std::string& text)
 
 std::string HRI::listen(const std::string& grammar)
 {
-    auto request = std::make_shared<vosk_speech_recognition::srv::SpeechRecog::Request>();
-    request->is_speech_recog_enabled = true;
+    auto request = std::make_shared<listener_interfaces::srv::Listen::Request>();
+    request->enable = true;
     request->grammar = grammar;
 
     if (!client_recog_->wait_for_service(std::chrono::milliseconds(500)))
@@ -58,7 +58,7 @@ std::string HRI::listen(const std::string& grammar)
 
     auto future = client_recog_->async_send_request(request);
 	if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(10)) == rclcpp::FutureReturnCode::SUCCESS)
-		return future.get()->text_recog;
+		return future.get()->recognized_speech;
 
 
     return "No recibio respuesta confiable";

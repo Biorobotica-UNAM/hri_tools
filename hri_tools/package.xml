@@ -11,7 +11,7 @@
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>nlohmann_json</depend>
-  <depend>vosk_speech_recognition</depend>
+  <depend>listener_interfaces</depend>
   <!-- <depend>geometry_msgs</depend> -->
   <!-- <depend>robotino_msgs</depend> -->
 

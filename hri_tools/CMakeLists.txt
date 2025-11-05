@@ -7,7 +7,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nlohmann_json REQUIRED)
-find_package(vosk_speech_recognition REQUIRED)
+find_package(listener_interfaces REQUIRED)
 #find_package(geometry_msgs REQUIRED)
 #find_package(robotino_msgs REQUIRED)
 
@@ -28,7 +28,7 @@ ament_target_dependencies(hri_tools
   rclcpp
   std_msgs
   nlohmann_json
-  vosk_speech_recognition
+  listener_interfaces
 #  geometry_msgs
 #  robotino_msgs
 
