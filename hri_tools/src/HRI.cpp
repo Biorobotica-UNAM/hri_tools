@@ -5,7 +5,7 @@ HRI::HRI(rclcpp::Node::SharedPtr node)
 {
     pub_speech_ = node_->create_publisher<std_msgs::msg::String>("voice/speech", 10);
     sub_speech_status_ = node_->create_subscription<std_msgs::msg::Bool>("voice/speech_status", 10, std::bind(&HRI::speechStatusCallback, this, std::placeholders::_1));
-    client_recog_ = node_->create_client<listener_interfaces::srv::Listen>("speech_recognition", rclcpp::QoS(10));
+    client_recog_ = node_->create_client<listener_interfaces::srv::Listen>("/listen", rclcpp::QoS(10));
 }
 
 void HRI::speechStatusCallback(const std_msgs::msg::Bool::SharedPtr msg)
