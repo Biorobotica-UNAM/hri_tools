@@ -11,13 +11,21 @@ Consta de dos componentes principales:
 ## 📁 Estructura general
 
   hri_tools/
+  
   ├── include/hri_tools/HRI.h # Cabecera del wrapper HRI (C++)
+  
   ├── src/HRI.cpp # Implementación del wrapper HRI (C++)
+  
   listener/
+  
   ├── listener.py # Nodo principal del servicio de voz
+  
   ├── grammar/ # Carpeta con archivos JSON de gramática
+  
   │ └── <gramática>.json
+  
   listener_interfaces/
+  
   ├── srv/Listen.srv # Definición del servicio de reconocimiento
 
 
