@@ -1,0 +1,27 @@
+<launch>
+
+    <!-- Declare namespace argument with default = hri -->
+    <arg name="namespace" default="hri"/>
+
+    <!-- Group all nodes under /hri -->
+    <group ns="$(var namespace)">
+
+        <!-- TALKER NODE -->
+        <node
+            pkg="talker"
+            exec="talker"
+            name="speech_talker"
+            output="screen">
+        </node>
+
+        <!-- LISTENER NODE -->
+        <node
+            pkg="listener"
+            exec="listener"
+            name="speech_listener"
+            output="screen">
+        </node>
+
+    </group>
+
+</launch>
