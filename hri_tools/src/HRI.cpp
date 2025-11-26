@@ -1,4 +1,4 @@
-#include "hri_tools/HRI.h"
+#include "hri_tools/HRI.hpp"
 
 HRI::HRI(rclcpp::Node::SharedPtr node)
     : node_(node), speech_done_(false)
