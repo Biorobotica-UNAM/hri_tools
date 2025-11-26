@@ -1,27 +1,26 @@
 <launch>
-
-    <!-- Declare namespace argument with default = hri -->
+    <!-- Declaramos el namespace -->
     <arg name="namespace" default="hri"/>
 
-    <!-- Group all nodes under /hri -->
-    <group ns="$(var namespace)">
 
-        <!-- TALKER NODE -->
-        <node
+    <group>
+        <push_ros_namespace  namespace="$(var namespace)"/>
+    <!-- TALKER -->
+    <node
             pkg="talker"
             exec="talker"
             name="speech_talker"
-            output="screen">
-        </node>
+            namespace="$(var namespace)"
+            output="screen"/>
 
-        <!-- LISTENER NODE -->
-        <node
+    <!-- LISTENER -->
+    <node
             pkg="listener"
             exec="listener"
             name="speech_listener"
-            output="screen">
-        </node>
+            namespace="$(var namespace)"
+            output="screen"/>
 
-    </group>
+    </goup>
 
 </launch>

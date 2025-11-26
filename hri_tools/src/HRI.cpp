@@ -8,7 +8,7 @@ HRI::HRI(rclcpp::Node::SharedPtr node)
     client_recog_ = node_->create_client<listener_interfaces::srv::Listen>("/listen", rclcpp::QoS(10));
 }
 
-void HRI::speechStatusCallback(const std_msgs::msg::Bool::SharedPtr msg)
+void HRI::SpeechStatusCallback(const std_msgs::msg::Bool::SharedPtr msg)
 {
     if(msg->data)
     {
@@ -17,7 +17,7 @@ void HRI::speechStatusCallback(const std_msgs::msg::Bool::SharedPtr msg)
     }
 }
 
-void HRI::say(const std::string& text)
+void HRI::Say(const std::string& text)
 {
     while(pub_speech_->get_subscription_count() == 0 && rclcpp::ok())
     {
@@ -47,7 +47,7 @@ void HRI::say(const std::string& text)
     }
 }
 
-std::string HRI::listen(const std::string& grammar)
+std::string HRI::Listen(const std::string& grammar)
 {
     auto request = std::make_shared<listener_interfaces::srv::Listen::Request>();
     request->enable = true;
