@@ -12,9 +12,7 @@
   <depend>std_msgs</depend>
   <depend>nlohmann_json</depend>
   <depend>listener_interfaces</depend>
-  <!-- <depend>geometry_msgs</depend> -->
-  <!-- <depend>robotino_msgs</depend> -->
-
+  
   <export>
     <build_type>ament_cmake</build_type>
   </export>
