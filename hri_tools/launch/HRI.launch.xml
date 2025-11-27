@@ -1,0 +1,15 @@
+<launch>
+
+    <group>
+        <push_ros_namespace namespace="HRI"/>
+
+        <!-- TALKER -->
+        <include file="$(find-pkg-share talker)/launch/talker.launch.xml"/>
+
+        <!-- LISTENER -->
+        <include file="$(find-pkg-share listener)/launch/listener.launch.xml"/>
+
+    </group>
+
+</launch>
+

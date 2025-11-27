@@ -8,6 +8,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(listener_interfaces REQUIRED)
+find_package(talker_interfaces REQUIRED)
 #find_package(geometry_msgs REQUIRED)
 #find_package(robotino_msgs REQUIRED)
 
@@ -16,6 +17,8 @@ include_directories(
   include
   ${rclcpp_INCLUDE_DIRS}
   ${std_msgs_INCLUDE_DIRS}
+  ${listener_interfaces_INCLUDE_DIRS}
+  ${talker_interfaces_INCLUDE_DIRS}
 #  ${geometry_msgs_INCLUDE_DIRS}
 #  ${robotino_msgs_INCLUDE_DIRS}
 )
@@ -29,6 +32,7 @@ ament_target_dependencies(hri_tools
   std_msgs
   nlohmann_json
   listener_interfaces
+  talker_interfaces
 #  geometry_msgs
 #  robotino_msgs
 
