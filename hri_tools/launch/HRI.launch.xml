@@ -1,21 +1,15 @@
 <launch>
-    <!-- Declaramos el namespace -->
-    <arg name="namespace" default="hri"/>
 
-    <!-- TALKER -->
-    <node
-            pkg="talker"
-            exec="talker"
-            name="speech_talker"
-            namespace="$(var namespace)"
-            output="screen"/>
+    <group>
+        <push_ros_namespace namespace="HRI"/>
 
-    <!-- LISTENER -->
-    <node
-            pkg="listener"
-            exec="listener"
-            name="speech_listener"
-            namespace="$(var namespace)"
-            output="screen"/>
+        <!-- TALKER -->
+        <include file="$(find-pkg-share talker)/launch/talker.launch.xml"/>
+
+        <!-- LISTENER -->
+        <include file="$(find-pkg-share listener)/launch/listener.launch.xml"/>
+
+    </group>
 
 </launch>
+
