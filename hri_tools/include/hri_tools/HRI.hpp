@@ -25,7 +25,7 @@ private:
     std::mutex mtx_;
     bool speech_done_;
 
-    void speechStatusCallback(const std_msgs::msg::Bool::SharedPtr msg);
+    void SpeechStatusCallback(const std_msgs::msg::Bool::SharedPtr msg);
     
 public:
     HRI(rclcpp::Node::SharedPtr node);

@@ -2,9 +2,6 @@
     <!-- Declaramos el namespace -->
     <arg name="namespace" default="hri"/>
 
-
-    <group>
-        <push_ros_namespace  namespace="$(var namespace)"/>
     <!-- TALKER -->
     <node
             pkg="talker"
@@ -20,7 +17,5 @@
             name="speech_listener"
             namespace="$(var namespace)"
             output="screen"/>
-
-    </goup>
 
 </launch>
