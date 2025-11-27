@@ -1,35 +1,35 @@
 #pragma once
 
 #include <string>
-#include <mutex>
-#include <memory>
 #include <chrono>
-#include <thread>
+#include <memory>
 
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp/qos.hpp"
-#include "std_msgs/msg/string.hpp"
-#include "std_msgs/msg/bool.hpp"
+#include "talker_interfaces/srv/talk.hpp"
 #include "listener_interfaces/srv/listen.hpp"
+
+struct TalkResult
+{
+    bool success;
+    std::string message;
+};
 
 class HRI
 {
+public:
+    explicit HRI(const rclcpp::Node::SharedPtr& node);
+
+    TalkResult Say(const std::string& text);
+    std::string listen(const std::string& grammar);
+
+private:
+    bool WaitForService(
+        const rclcpp::ClientBase::SharedPtr& client,
+        const std::chrono::milliseconds& timeout) const;
+
 private:
     rclcpp::Node::SharedPtr node_;
-    
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_speech_;
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr sub_speech_status_;
-    
-    rclcpp::Client<listener_interfaces::srv::Listen>::SharedPtr client_recog_;
-    
-    std::mutex mtx_;
-    bool speech_done_;
 
-    void SpeechStatusCallback(const std_msgs::msg::Bool::SharedPtr msg);
-    
-public:
-    HRI(rclcpp::Node::SharedPtr node);
-    
-    void Say(const std::string& text);
-    std::string Listen(const std::string& grammar);
+    rclcpp::Client<talker_interfaces::srv::Talk>::SharedPtr talker_client_;
+    rclcpp::Client<listener_interfaces::srv::Listen>::SharedPtr listener_client_;
 };
