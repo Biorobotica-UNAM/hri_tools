@@ -8,22 +8,16 @@
 #include "talker_interfaces/srv/talk.hpp"
 #include "listener_interfaces/srv/listen.hpp"
 
-struct TalkResult
-{
-    bool success;
-    std::string message;
-};
-
 class HRI
 {
 public:
     explicit HRI(const rclcpp::Node::SharedPtr& node);
 
-    TalkResult Say(const std::string& text);
+    bool Say(const std::string& text);
     std::string listen(const std::string& grammar);
 
 private:
-    bool WaitForService(
+    bool waitForService(
         const rclcpp::ClientBase::SharedPtr& client,
         const std::chrono::milliseconds& timeout) const;
 

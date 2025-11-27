@@ -5,26 +5,24 @@ using namespace std::chrono_literals;
 HRI::HRI(const rclcpp::Node::SharedPtr& node)
     : node_(node)
 {
-    talker_client_ = node_->create_client<talker_interfaces::srv::Talk>("/hri/talker/talk");
-    listener_client_ = node_->create_client<listener_interfaces::srv::Listen>("/hri/listener/listen");
+    talker_client_ = node_->create_client<talker_interfaces::srv::Talk>("/HRI/talker/talk");
+    listener_client_ = node_->create_client<listener_interfaces::srv::Listen>("/HRI/listener/listen");
 }
 
 // ---------------------------------------------------------
-// Speak
+// Talker
 // ---------------------------------------------------------
 
-TalkResult HRI::Say(const std::string& text)
+bool HRI::Say(const std::string& text)
 {
-    TalkResult result;
-
     auto request = std::make_shared<talker_interfaces::srv::Talk::Request>();
     request->text = text;
 
-    if (!WaitForService(talker_client_, 500ms))
+    if (!waitForService(talker_client_, 500ms))
     {
-        result.success = false;
-        result.message = "Talk service unavailable (/talk)";
-        return result;
+        RCLCPP_ERROR(node_->get_logger(),
+                     "Talk service unavailable (/talk)");
+        return false;
     }
 
     auto future = talker_client_->async_send_request(request);
@@ -34,15 +32,25 @@ TalkResult HRI::Say(const std::string& text)
 
     if (state != rclcpp::FutureReturnCode::SUCCESS)
     {
-        result.success = false;
-        result.message = "No response from talk service";
-        return result;
+        RCLCPP_ERROR(node_->get_logger(),
+                     "No response from talk service");
+        return false;
     }
 
     auto response = future.get();
-    result.success = response->success;
-    result.message = response->message;
-    return result;
+
+    if (response->success)
+    {
+        RCLCPP_INFO(node_->get_logger(),
+                    "TTS OK: %s", response->message.c_str());
+    }
+    else
+    {
+        RCLCPP_ERROR(node_->get_logger(),
+                     "TTS ERROR: %s", response->message.c_str());
+    }
+
+    return response->success;
 }
 
 // ---------------------------------------------------------
@@ -55,8 +63,12 @@ std::string HRI::listen(const std::string& grammar)
     request->enable = true;
     request->grammar = grammar;
 
-    if (!WaitForService(listener_client_, 500ms))
-        return "Listen service unavailable (/listen)";
+    if (!waitForService(listener_client_, 1000ms))
+    {
+        RCLCPP_ERROR(node_->get_logger(),
+                     "Listen service unavailable (/listen)");
+        return "";
+    }
 
     auto future = listener_client_->async_send_request(request);
 
@@ -64,7 +76,11 @@ std::string HRI::listen(const std::string& grammar)
         node_, future, 10s);
 
     if (state != rclcpp::FutureReturnCode::SUCCESS)
-        return "No response from listen service";
+    {
+        RCLCPP_ERROR(node_->get_logger(),
+                     "No response from listen service");
+        return "";
+    }
 
     return future.get()->recognized_speech;
 }
@@ -73,7 +89,7 @@ std::string HRI::listen(const std::string& grammar)
 // Wait for service helper
 // ---------------------------------------------------------
 
-bool HRI::WaitForService(
+bool HRI::waitForService(
     const rclcpp::ClientBase::SharedPtr& client,
     const std::chrono::milliseconds& timeout) const
 {
