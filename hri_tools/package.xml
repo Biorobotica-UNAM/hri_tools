@@ -10,6 +10,7 @@
 
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
   <depend>nlohmann_json</depend>
   <depend>listener_interfaces</depend>
   <depend>talker_interfaces</depend>

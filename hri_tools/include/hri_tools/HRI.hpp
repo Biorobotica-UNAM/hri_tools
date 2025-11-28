@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
+#include "std_srvs/srv/set_bool.hpp"
 #include "talker_interfaces/srv/talk.hpp"
 #include "listener_interfaces/srv/listen.hpp"
 
@@ -15,9 +16,9 @@ public:
 
     bool Say(const std::string& text);
 
-    std::string listen(const std::string& grammar);
+    std::string Listen(const std::string& grammar);
 
-    bool enableFollowHuman(bool enable);
+    bool EnableFollowHuman(bool enable);
 
 private:
     bool waitForService(

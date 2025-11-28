@@ -101,7 +101,7 @@ bool HRI::waitForService(
 // Human Follower
 // -------------------------------------------------------------------------
 
-bool HRI::enableFollowHuman(bool enable)
+bool HRI::EnableFollowHuman(bool enable)
 {
     auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
     request->data = enable;
