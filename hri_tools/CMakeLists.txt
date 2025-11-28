@@ -38,7 +38,7 @@ ament_target_dependencies(hri_tools
 
 )
 
-install(DIRECTORY include/
+install(DIRECTORY include
   DESTINATION include
 )
 
