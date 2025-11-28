@@ -4,3 +4,6 @@
 [submodule "listener"]
 	path = listener
 	url = https://github.com/Biorobotica-UNAM/listener.git
+[submodule "human_detection"]
+	path = human_detection
+	url = https://github.com/Biorobotica-UNAM/human_detection
