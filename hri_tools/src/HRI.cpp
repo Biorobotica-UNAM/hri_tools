@@ -57,7 +57,7 @@ bool HRI::Say(const std::string& text)
 // Listen
 // ---------------------------------------------------------
 
-std::string HRI::listen(const std::string& grammar)
+std::string HRI::Listen(const std::string& grammar)
 {
     auto request = std::make_shared<listener_interfaces::srv::Listen::Request>();
     request->enable = true;
