@@ -14,7 +14,7 @@ public:
     explicit HRI(const rclcpp::Node::SharedPtr& node);
 
     bool Say(const std::string& text);
-    std::string listen(const std::string& grammar);
+    std::string Listen(const std::string& grammar);
 
 private:
     bool waitForService(
