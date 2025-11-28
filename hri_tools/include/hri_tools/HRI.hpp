@@ -26,4 +26,5 @@ private:
 
     rclcpp::Client<talker_interfaces::srv::Talk>::SharedPtr talker_client_;
     rclcpp::Client<listener_interfaces::srv::Listen>::SharedPtr listener_client_;
+    rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr human_follower_client_;
 };
