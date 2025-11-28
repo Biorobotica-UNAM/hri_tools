@@ -18,7 +18,7 @@ public:
 
     std::string Listen(const std::string& grammar);
 
-    bool EnableFollowHuman(bool enable);
+    bool FollowPerson(bool enable);
 
 private:
     bool waitForService(
