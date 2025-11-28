@@ -14,7 +14,10 @@ public:
     explicit HRI(const rclcpp::Node::SharedPtr& node);
 
     bool Say(const std::string& text);
+
     std::string listen(const std::string& grammar);
+
+    bool enableFollowHuman(bool enable);
 
 private:
     bool waitForService(
