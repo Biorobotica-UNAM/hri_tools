@@ -5,8 +5,8 @@ using namespace std::chrono_literals;
 HRI::HRI(const rclcpp::Node::SharedPtr& node)
     : node_(node)
 {
-    talker_client_ = node_->create_client<talker_interfaces::srv::Talk>("/HRI/talker/talk");
-    listener_client_ = node_->create_client<listener_interfaces::srv::Listen>("/HRI/listener/listen");
+    talker_client_ = node_->create_client<talker_interfaces::srv::Talk>("/hri/talker/talk");
+    listener_client_ = node_->create_client<listener_interfaces::srv::Listen>("/hri/listener/listen");
     human_follower_client_ = node_->create_client<std_srvs::srv::SetBool>("/hri/human_tracking/enable");
 }
 
