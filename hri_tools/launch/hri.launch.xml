@@ -1,7 +1,7 @@
 <launch>
 
     <group>
-        <push_ros_namespace namespace="HRI"/>
+        <push_ros_namespace namespace="hri"/>
 
         <!-- TALKER -->
         <include file="$(find-pkg-share talker)/launch/talker.launch.xml"/>

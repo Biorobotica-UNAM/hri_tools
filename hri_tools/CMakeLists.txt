@@ -6,12 +6,10 @@ set(CMAKE_CXX_STANDARD 14)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(listener_interfaces REQUIRED)
 find_package(talker_interfaces REQUIRED)
-#find_package(geometry_msgs REQUIRED)
-#find_package(robotino_msgs REQUIRED)
-
 
 include_directories(
   include
@@ -19,8 +17,6 @@ include_directories(
   ${std_msgs_INCLUDE_DIRS}
   ${listener_interfaces_INCLUDE_DIRS}
   ${talker_interfaces_INCLUDE_DIRS}
-#  ${geometry_msgs_INCLUDE_DIRS}
-#  ${robotino_msgs_INCLUDE_DIRS}
 )
 
 add_library(hri_tools SHARED
@@ -30,12 +26,10 @@ add_library(hri_tools SHARED
 ament_target_dependencies(hri_tools
   rclcpp
   std_msgs
+  std_srvs
   nlohmann_json
   listener_interfaces
   talker_interfaces
-#  geometry_msgs
-#  robotino_msgs
-
 )
 
 install(DIRECTORY include/
@@ -45,7 +39,7 @@ install(DIRECTORY include/
 install(TARGETS hri_tools
   DESTINATION lib
 )
- # AQUI AGREGUE LO DEL LAUNCH
+
 install(
   DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
