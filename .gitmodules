@@ -4,6 +4,7 @@
 [submodule "listener"]
 	path = listener
 	url = https://github.com/Biorobotica-UNAM/listener.git
+	branch = listener_clips
 [submodule "human_detector"]
 	path = human_detector
 	url = https://github.com/Biorobotica-UNAM/human_detector.git
