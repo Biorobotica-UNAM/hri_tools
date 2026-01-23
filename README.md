@@ -1,4 +1,4 @@
-# 🗣️ HRI & Listener — Interfaz de Voz ROS 2
+# hri_tools
 
 Este paquete implementa una **interfaz de interacción humano–robot (HRI)** a través de voz.  
 Consta de dos componentes principales:
