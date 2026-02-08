@@ -11,44 +11,67 @@ HRI::HRI(const rclcpp::Node::SharedPtr& node)
 }
 
 // ---------------------------------------------------------
+// Wait for service
+// ---------------------------------------------------------
+
+bool HRI::waitForService(
+    const rclcpp::ClientBase::SharedPtr& client,
+    const std::chrono::milliseconds& timeout) const
+{
+    return client->wait_for_service(timeout);
+}
+
+// ---------------------------------------------------------
 // Talker
 // ---------------------------------------------------------
 
 bool HRI::Say(const std::string& text)
 {
-    auto request = std::make_shared<talker_interfaces::srv::Talk::Request>();
-    request->text = text;
-
     if (!waitForService(talker_client_, 500ms))
     {
         RCLCPP_ERROR(node_->get_logger(),
                      "Talk service unavailable (/talk)");
         return false;
     }
+    
+    auto request = std::make_shared<talker_interfaces::srv::Talk::Request>();
+    request->text = text;
+    
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool done = false;
+    bool success = false;
+    std::string message;
 
-    auto future = talker_client_->async_send_request(request);
+    auto callback = [&](rclcpp::Client<talker_interfaces::srv::Talk>::SharedFuture future)
+        {
+            auto response = future.get();
+            success = response->success;
+            message = response->message;
+            done = true;
+            cv.notify_one();
+        };
 
-    auto state = rclcpp::spin_until_future_complete(
-        node_, future, 10s);
-
-    if (state != rclcpp::FutureReturnCode::SUCCESS)
+	talker_client_->async_send_request(request, callback);
+	
+	std::unique_lock<std::mutex> lock(mtx);
+	
+	if (!cv.wait_for(lock, 10s, [&]{ return done; }))
     {
         RCLCPP_ERROR(node_->get_logger(),
-                     "No response from talk service");
+                     "Talk service timed out");
         return false;
     }
 
-    auto response = future.get();
-
-    if (response->success)
+    if (success)
     {
         RCLCPP_INFO(node_->get_logger(),
-                    "TTS OK: %s", response->message.c_str());
+                    "TTS OK: %s", message.c_str());
     }
     else
     {
         RCLCPP_ERROR(node_->get_logger(),
-                     "TTS ERROR: %s", response->message.c_str());
+                     "TTS ERROR: %s", message.c_str());
     }
 
     return response->success;
@@ -60,87 +83,97 @@ bool HRI::Say(const std::string& text)
 
 std::string HRI::Listen(const std::string& grammar)
 {
-    auto request = std::make_shared<listener_interfaces::srv::Listen::Request>();
-    request->enable = true;
-    request->grammar = grammar;
-
-    if (!waitForService(listener_client_, 1000ms))
+    if (!waitForService(listener_client_, 500ms))
     {
         RCLCPP_ERROR(node_->get_logger(),
                      "Listen service unavailable (/listen)");
         return "";
     }
+    
+    auto request = std::make_shared<listener_interfaces::srv::Listen::Request>();
+    request->enable = true;
+    request->grammar = grammar;
 
-    auto future = listener_client_->async_send_request(request);
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool done = false;
+    std::string recognized;
+    
+    auto callback = [&](rclcpp::Client<listener_interfaces::srv::Listen>::SharedFuture future)
+        {
+            recognized = future.get()->recognized_speech;
+            done = true;
+            cv.notify_one();
+        };
 
-    auto state = rclcpp::spin_until_future_complete(
-        node_, future, 10s);
-
-    if (state != rclcpp::FutureReturnCode::SUCCESS)
+    listener_client_->async_send_request(request, callback);
+    
+    std::unique_lock<std::mutex> lock(mtx);
+    
+    if (!cv.wait_for(lock, 10s, [&]{ return done; }))
     {
         RCLCPP_ERROR(node_->get_logger(),
-                     "No response from listen service");
+                     "Listen service timed out");
         return "";
     }
 
     return future.get()->recognized_speech;
 }
 
-// ---------------------------------------------------------
-// Wait for service helper
-// ---------------------------------------------------------
-
-bool HRI::waitForService(
-    const rclcpp::ClientBase::SharedPtr& client,
-    const std::chrono::milliseconds& timeout) const
-{
-    return client->wait_for_service(timeout);
-}
-
 // -------------------------------------------------------------------------
-// Human Follower
+// Follow person
 // -------------------------------------------------------------------------
 
 bool HRI::FollowPerson(bool enable)
 {
-    auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
-    request->data = enable;
-
-    // Espera a que el servicio esté disponible
     if (!waitForService(human_follower_client_, 1000ms))
     {
         RCLCPP_ERROR(node_->get_logger(),
-                     "Human tracking service unavailable (/hri/human_tracking/enable)");
+                     "Human tracking service unavailable");
         return false;
     }
 
-    // Llamada asíncrona
-    auto future = human_follower_client_->async_send_request(request);
+    auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
+    request->data = enable;
 
-    // Espera la respuesta
-    auto state = rclcpp::spin_until_future_complete(
-        node_, future, 5s);
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool done = false;
+    bool success = false;
+    std::string message;
 
-    if (state != rclcpp::FutureReturnCode::SUCCESS)
+    auto callback = [&](rclcpp::Client<std_srvs::srv::SetBool>::SharedFuture future)
+        {
+            auto response = future.get();
+            success = response->success;
+            message = response->message;
+            done = true;
+            cv.notify_one();
+        };
+
+    human_follower_client_->async_send_request(request, callback);
+
+    std::unique_lock<std::mutex> lock(mtx);
+    
+    if (!cv.wait_for(lock, 5s, [&]{ return done; }))
     {
         RCLCPP_ERROR(node_->get_logger(),
-                     "No response from /hri/human_tracking/enable");
+                     "Human tracking service timed out");
         return false;
     }
 
-    auto response = future.get();
-    if (!response->success)
+    if (!success)
     {
         RCLCPP_WARN(node_->get_logger(),
-                    "Human tracking service returned false: %s",
-                    response->message.c_str());
+                    "Human tracking failed: %s",
+                    message.c_str());
         return false;
     }
 
     RCLCPP_INFO(node_->get_logger(),
                 "Human tracking %s OK: %s",
                 enable ? "ENABLED" : "DISABLED",
-                response->message.c_str());
+                message.c_str());
 
     return true;
 }
