@@ -74,7 +74,7 @@ bool HRI::Say(const std::string& text)
                      "TTS ERROR: %s", message.c_str());
     }
 
-    return response->success;
+    return success;
 }
 
 // ---------------------------------------------------------
@@ -117,7 +117,7 @@ std::string HRI::Listen(const std::string& grammar)
         return "";
     }
 
-    return future.get()->recognized_speech;
+    return recognized;
 }
 
 // -------------------------------------------------------------------------
