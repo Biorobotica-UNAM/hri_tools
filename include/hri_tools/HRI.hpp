@@ -2,7 +2,8 @@
 
 #include <string>
 #include <memory>
-#include <chrono>
+#include <mutex>
+#include <condition_variable>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/set_bool.hpp"
@@ -15,16 +16,14 @@ public:
     explicit HRI(const rclcpp::Node::SharedPtr& node);
 
     bool Say(const std::string& text);
-
     std::string Listen(const std::string& grammar);
-
     bool FollowPerson(bool enable);
 
 private:
-    rclcpp::Node::SharedPtr node;
+    rclcpp::Node::SharedPtr node_;
 
-    rclcpp::Client<talker_interfaces::srv::Talk>::SharedPtr talkerClient;
-    rclcpp::Client<listener_interfaces::srv::Listen>::SharedPtr listenerClient;
-    rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr followerClient;
+    rclcpp::Client<talker_interfaces::srv::Talk>::SharedPtr talker_client_;
+    rclcpp::Client<listener_interfaces::srv::Listen>::SharedPtr listener_client_;
+    rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr human_follower_client_;
 };
 
