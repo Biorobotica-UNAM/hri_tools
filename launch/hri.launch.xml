@@ -2,9 +2,13 @@
 
     <group>
         <push_ros_namespace namespace="hri"/>
-
+        
+        <!-- Takeshi - False.  Justina - True -->
+        <arg name="use_talker" default="true"/>
+        
         <!-- TALKER -->
-        <include file="$(find-pkg-share talker)/launch/talker.launch.xml"/>
+        <include file="$(find-pkg-share talker)/launch/talker.launch.xml"
+            if="$(var use_talker)"/>
 
         <!-- LISTENER -->
         <include file="$(find-pkg-share listener)/launch/listener.launch.xml"/>
