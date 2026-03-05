@@ -82,7 +82,7 @@ std::string HRI::Listen(const std::string& grammar)
     std::unique_lock<std::mutex> lock(mtx);
     if (!cv.wait_for(lock, 10s, [&]{ return done; })) {
         RCLCPP_ERROR(node_->get_logger(), "Listen service timed out");
-        return "";
+        return "NoData";
     }
 
     return recognized;
