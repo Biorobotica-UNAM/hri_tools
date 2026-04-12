@@ -5,8 +5,10 @@
  *   1. Build the service request.
  *   2. Map the service response to the return value.
  *
- * The entire async + mutex + condition_variable + timeout pattern
- * is handled once in HRI::call_service<T>() (defined in the header).
+ * All clients are created in a ReentrantCallbackGroup so their
+ * response callbacks can run concurrently with any caller callback.
+ * call_service<T>() uses future.wait_for() instead of mutex+cv
+ * to avoid deadlocking the executor.
  *
  * BioRobotics Laboratory, Facultad de Ingenieria, UNAM
  */
@@ -18,12 +20,19 @@
 // ============================================================
 
 HRI::HRI(const rclcpp::Node::SharedPtr &node) : node_(node) {
-  talker_client_ =
-      node_->create_client<talker_interfaces::srv::Talk>("/hri/talker/talk");
+  cb_group_clients_ =
+      node_->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+
+  const rclcpp::QoS qos = rclcpp::ServicesQoS();
+
+  talker_client_ = node_->create_client<talker_interfaces::srv::Talk>(
+      "/hri/talker/talk", qos, cb_group_clients_);
+
   listener_client_ = node_->create_client<listener_interfaces::srv::Listen>(
-      "/hri/listener/listen");
+      "/listener/listen", qos, cb_group_clients_);
+
   follower_client_ = node_->create_client<std_srvs::srv::SetBool>(
-      "/hri/human_tracking/enable");
+      "/hri/human_tracking/enable", qos, cb_group_clients_);
 }
 
 // ============================================================
@@ -38,8 +47,7 @@ bool HRI::Say(const std::string &text, std::chrono::seconds timeout) {
 
   bool completed = call_service<talker_interfaces::srv::Talk>(
       talker_client_, request,
-      [&](auto future) {
-        auto response = future.get();
+      [&](auto response) {
         success = response->success;
         RCLCPP_INFO(node_->get_logger(), "TTS %s: %s", success ? "OK" : "ERROR",
                     response->message.c_str());
@@ -63,10 +71,10 @@ std::string HRI::Listen(const std::string &grammar,
 
   call_service<listener_interfaces::srv::Listen>(
       listener_client_, request,
-      [&](auto future) { recognized = future.get()->recognized_speech; },
-      timeout, "Listen");
+      [&](auto response) { recognized = response->recognized_speech; }, timeout,
+      "Listen");
 
-  return recognized; // empty string if timed out or unavailable
+  return recognized;
 }
 
 // ============================================================
@@ -81,8 +89,7 @@ bool HRI::FollowPerson(bool enable, std::chrono::seconds timeout) {
 
   bool completed = call_service<std_srvs::srv::SetBool>(
       follower_client_, request,
-      [&](auto future) {
-        auto response = future.get();
+      [&](auto response) {
         success = response->success;
         RCLCPP_INFO(node_->get_logger(), "Human tracking %s %s: %s",
                     enable ? "ENABLE" : "DISABLE", success ? "OK" : "FAILED",

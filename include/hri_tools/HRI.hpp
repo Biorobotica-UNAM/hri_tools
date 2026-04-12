@@ -5,7 +5,7 @@
  *
  * Responsibility: provide a clean, synchronous interface to HRI
  * services (speech, listening, person following) so callers never
- * need to know about ROS2 async patterns, mutexes, or timeouts.
+ * need to know about ROS2 async patterns or timeouts.
  *
  * Design patterns applied:
  *   Facade          (GoF Structural)  — hides ROS2 service clients
@@ -18,17 +18,16 @@
  *
  * Principles applied:
  *   SRP  — one class, one responsibility: HRI communication.
- *   DRY  — the async+mutex+cv+timeout pattern lives in exactly one place.
+ *   DRY  — the async + future.wait_for + timeout pattern lives in
+ *          exactly one place.
  *   DIP  — callers depend on HRI, not on rclcpp::Client directly.
  *
  * BioRobotics Laboratory, Facultad de Ingenieria, UNAM
  */
 
 #include <chrono>
-#include <condition_variable>
-#include <functional>
+#include <future>
 #include <memory>
-#include <mutex>
 #include <string>
 
 #include "listener_interfaces/srv/listen.hpp"
@@ -53,11 +52,11 @@ public:
   /**
    * Request one speech recognition cycle and return the result.
    * @param grammar  Optional grammar filename (empty = free-form).
-   * @param timeout  Maximum time to wait for the service (default: 10 s).
+   * @param timeout  Maximum time to wait for the service (default: 30 s).
    * @return Recognised text, or empty string on failure / timeout.
    */
   std::string Listen(const std::string &grammar = "",
-                     std::chrono::seconds timeout = 10s);
+                     std::chrono::seconds timeout = 30s);
 
   /**
    * Enable or disable the human-following behaviour.
@@ -69,24 +68,25 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
+  rclcpp::CallbackGroup::SharedPtr cb_group_clients_;
 
   rclcpp::Client<talker_interfaces::srv::Talk>::SharedPtr talker_client_;
   rclcpp::Client<listener_interfaces::srv::Listen>::SharedPtr listener_client_;
   rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr follower_client_;
 
   /**
-   * Template Method: invariant async→wait→return flow.
+   * Template Method: invariant async → wait → return flow.
    *
-   * Encapsulates the mutex + condition_variable + timeout pattern
-   * that is otherwise duplicated in every service call.
+   * Uses future.wait_for() with a ReentrantCallbackGroup so this
+   * method can be called safely from inside any ROS2 callback without
+   * blocking the executor.
    *
-   * @tparam ServiceT   ROS2 service type (e.g. talker_interfaces::srv::Talk).
-   * @tparam CallbackT  Callable: (SharedFuture) → void — reads the response
-   *                    and stores results into captured variables.
+   * @tparam ServiceT   ROS2 service type.
+   * @tparam CallbackT  Callable: (Response::SharedPtr) → void.
    *
    * @param client      The service client to use.
    * @param request     The fully populated request object.
-   * @param on_response Callback that extracts results from the future.
+   * @param on_response Callback that extracts results from the response.
    * @param timeout     Maximum time allowed for the call.
    * @param label       Human-readable service name for log messages.
    *
@@ -109,29 +109,19 @@ bool HRI::call_service(typename rclcpp::Client<ServiceT>::SharedPtr &client,
                        CallbackT on_response, std::chrono::seconds timeout,
                        const std::string &label) {
   if (!client->wait_for_service(1s)) {
-    RCLCPP_ERROR(node_->get_logger(), "%s service unavailable.", label.c_str());
+    RCLCPP_ERROR(node_->get_logger(), "%s service not available.",
+                 label.c_str());
     return false;
   }
 
-  std::mutex mtx;
-  std::condition_variable cv;
-  bool done = false;
+  auto future = client->async_send_request(request);
 
-  auto callback = [&](typename rclcpp::Client<ServiceT>::SharedFuture future) {
-    on_response(future);
-    std::lock_guard<std::mutex> lock(mtx);
-    done = true;
-    cv.notify_one();
-  };
-
-  client->async_send_request(request, callback);
-
-  std::unique_lock<std::mutex> lock(mtx);
-  if (!cv.wait_for(lock, timeout, [&] { return done; })) {
-    RCLCPP_ERROR(node_->get_logger(), "%s service timed out after %ld s.",
+  if (future.wait_for(timeout) != std::future_status::ready) {
+    RCLCPP_ERROR(node_->get_logger(), "Timeout calling %s service after %ld s.",
                  label.c_str(), timeout.count());
     return false;
   }
 
+  on_response(future.get());
   return true;
 }
