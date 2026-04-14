@@ -12,6 +12,11 @@
         <!-- LISTENER -->
         <include file="$(find-pkg-share listener)/launch/listener.launch.xml"/>
 
+
+        <include file="$(find-pkg-share hri_tools)/launch/human_detector.launch.xml"/>
+
+        <include file="$(find-pkg-share human_follower)/launch/human_follower.launch.xml"/>   
+
     </group>
 
 </launch>
