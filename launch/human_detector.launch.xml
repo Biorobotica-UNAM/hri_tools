@@ -1,15 +1,13 @@
+
+
 <launch>
     <group>
-        <push_ros_namespace namespace="hri"/>
 
-        
-        <node pkg="human_detection" 
-              exec="person_tracker" 
-              name="person_tracker_node">
-            <param name="enable_debug_markers" value="true"/>
-            <param name="point_cloud_topic" value="/hardware/camera/points"/>
-            <param name="target_frame" value="base_link"/>
-        </node>
+        <!-- Person Tracker node--> 
+  <node pkg="human_detection" exec="person_tracker" name="person_tracker" output="screen">
+    <param name="point_cloud_topic" value="/hardware/camera/points"/>
+    <param name="target_frame" value="base_link"/>
+  </node>
 
     </group>
-</launch>
+</launch> 
