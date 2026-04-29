@@ -29,7 +29,7 @@ HRI::HRI(const rclcpp::Node::SharedPtr &node) : node_(node) {
       "/hri/talker/talk", qos, cb_group_clients_);
 
   listener_client_ = node_->create_client<listener_interfaces::srv::Listen>(
-      "/listener/listen", qos, cb_group_clients_);
+      "/hri/listener/listen", qos, cb_group_clients_);
 
   follower_client_ = node_->create_client<std_srvs::srv::SetBool>(
       "/hri/human_tracking/enable", qos, cb_group_clients_);
