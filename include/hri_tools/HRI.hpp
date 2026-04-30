@@ -52,11 +52,11 @@ public:
   /**
    * Request one speech recognition cycle and return the result.
    * @param grammar  Optional grammar filename (empty = free-form).
-   * @param timeout  Maximum time to wait for the service (default: 30 s).
+   * @param timeout  Maximum time to wait for the service (default: 5 s).
    * @return Recognised text, or empty string on failure / timeout.
    */
   std::string Listen(const std::string &grammar = "",
-                     std::chrono::seconds timeout = 30s);
+                     std::chrono::seconds timeout = 5s);
 
   /**
    * Enable or disable the human-following behaviour.
