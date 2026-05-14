@@ -45,6 +45,15 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+ament_export_dependencies(
+  rclcpp
+  std_msgs
+  std_srvs
+  nlohmann_json
+  listener_interfaces
+  talker_interfaces
+)
+
 ament_export_include_directories(include)
 ament_export_libraries(hri_tools)
 
