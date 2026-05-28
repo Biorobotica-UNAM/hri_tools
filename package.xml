@@ -14,6 +14,8 @@
   <depend>nlohmann_json</depend>
   <depend>listener_interfaces</depend>
   <depend>talker_interfaces</depend>
+  <depend>human_interfaces</depend>
+
   
   <export>
     <build_type>ament_cmake</build_type>
