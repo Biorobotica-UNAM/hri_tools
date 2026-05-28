@@ -10,6 +10,8 @@ find_package(std_srvs REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(listener_interfaces REQUIRED)
 find_package(talker_interfaces REQUIRED)
+find_package(human_interfaces REQUIRED)
+
 
 include_directories(
   include
@@ -30,6 +32,7 @@ ament_target_dependencies(hri_tools
   nlohmann_json
   listener_interfaces
   talker_interfaces
+  human_interfaces
 )
 
 install(DIRECTORY include/
@@ -52,6 +55,7 @@ ament_export_dependencies(
   nlohmann_json
   listener_interfaces
   talker_interfaces
+  human_interfaces
 )
 
 ament_export_include_directories(include)

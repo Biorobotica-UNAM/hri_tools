@@ -34,6 +34,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/set_bool.hpp"
 #include "talker_interfaces/srv/talk.hpp"
+#include "human_interfaces/srv/detect_pointing.hpp"
+#include "geometry_msgs/msg/point_stamped.hpp"
 
 using namespace std::chrono_literals;
 
@@ -66,6 +68,20 @@ public:
    */
   bool FollowPerson(bool enable, std::chrono::seconds timeout = 5s);
 
+  /**
+   * Solicita la deteccion de un gesto humano (wave, raise, point) y regresa 
+   * la orientacion espacial y su coordenada 3D respecto a la camara.
+   * @param action_type Tipo de accion a detectar (wave, raising, pointing).
+   * @param arm_side    Brazo a evaluar (left, right, any).
+   * @param out_direction String de salida con el formato "accion_brazo_zona_distancia".
+   * @param out_point   Punto 3D de salida (PointStamped).
+   * @param timeout     Tiempo maximo de espera (default: 5 s).
+   * @return true si se detecto el humano realizando la pose solicitada.
+   */
+  bool FindPose(const std::string &action_type, const std::string &arm_side,
+                std::string &out_direction, geometry_msgs::msg::PointStamped &out_point,
+                std::chrono::seconds timeout = 5s);
+
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp::CallbackGroup::SharedPtr cb_group_clients_;
@@ -73,6 +89,7 @@ private:
   rclcpp::Client<talker_interfaces::srv::Talk>::SharedPtr talker_client_;
   rclcpp::Client<listener_interfaces::srv::Listen>::SharedPtr listener_client_;
   rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr follower_client_;
+  rclcpp::Client<human_interfaces::srv::DetectPointing>::SharedPtr find_pose_client_;
 
   /**
    * Template Method: invariant async → wait → return flow.
